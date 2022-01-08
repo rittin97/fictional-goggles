@@ -21,6 +21,9 @@
 interface IReadWritePlayers {
     function readPlayers($source, $filename = null);
     function writePlayer($source, $player, $filename = null);
+}
+
+interface IDisplayPlayers {
     function display($isCLI, $course, $filename = null);
 }
 
@@ -142,13 +145,21 @@ class PlayersObject implements IReadWritePlayers {
         return $file;
     }
 
-    function display($isCLI, $source, $filename = null) {
+}
 
-        $players = $this->readPlayers($source, $filename);
+class DisplayPlayersObject implements IDisplayPlayers {
+    
+    private $players = null;
+
+    public function __construct($playersData) {
+        $this->players = $playersData;
+    }
+
+    function display($isCLI, $source, $filename = null) {
 
         if ($isCLI) {
             echo "Current Players: \n";
-            foreach ($players as $player) {
+            foreach ($this->players as $player) {
 
                 echo "\tName: $player->name\n";
                 echo "\tAge: $player->age\n";
@@ -175,7 +186,7 @@ class PlayersObject implements IReadWritePlayers {
             <div>
                 <span class="title">Current Players</span>
                 <ul>
-                    <?php foreach($players as $player) { ?>
+                    <?php foreach($this->players as $player) { ?>
                         <li>
                             <div>
                                 <span class="player-name">Name: <?= $player->name ?></span>
@@ -196,6 +207,10 @@ class PlayersObject implements IReadWritePlayers {
 
 $playersObject = new PlayersObject();
 
-$playersObject->display(php_sapi_name() === 'cli', 'array');
+$playersData = $playersObject->readPlayers('array');
+
+$displayPlayersObject = new DisplayPlayersObject($playersData);
+
+$displayPlayersObject->display(php_sapi_name() === 'cli', 'array');
 
 ?>
