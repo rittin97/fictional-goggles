@@ -170,7 +170,6 @@ class DisplayPlayersObjectRenderCli implements IDisplayPlayers {
 
 }
 
-
 class DisplayPlayersObjectRenderHtml implements IDisplayPlayers {
     
     private $players = null;
@@ -220,31 +219,50 @@ class DisplayPlayersObjectRenderHtml implements IDisplayPlayers {
 class PlayersObjectController {
 
     // Business logic can be used here to use respective data type: Array, Json, File, etc. (I'm sticking to Array)
-    private $playersObject, $displayPlayersObject;
+    private $playersObject, $displayPlayersObject, $displayType;
+
+    public function __construct($renderType) {
+        $this->displayType = $renderType;
+    }
 
     public function getArrayData() {
         $playersObject = new PlayersObjectArray();
-        $playersData = $playersObject->readPlayers();
-        $displayPlayersObject = new DisplayPlayersObjectRenderCli($playersData);
-        $displayPlayersObject->display();
+        $this->display($this->displayType, $playersObject);
     }
 
     public function getJsonData() {
         $playersObject = new PlayersObjectJson();
-        $playersData = $playersObject->readPlayers();
-        $displayPlayersObject = new DisplayPlayersObjectRenderCli($playersData);
-        $displayPlayersObject->display();
+        $this->display($this->displayType, $playersObject);
     }
 
     public function getFileData($filename = null) {
         $playersObject = new PlayersObjectFile();
+        $this->display($this->displayType, $playersObject, $filename);
+    }
+
+    private function display($displayType, $playersObject, $filename = null) {
         $playersData = $playersObject->readPlayers($filename);
-        $displayPlayersObject = new DisplayPlayersObjectRenderCli($playersData);
+
+        if ($displayType == 'cli') {
+            $displayPlayersObject = new DisplayPlayersObjectRenderCli($playersData);
+        }
+        else if ($displayType == 'html') {
+            $displayPlayersObject = new DisplayPlayersObjectRenderHtml($playersData);
+        }
+        else {
+            echo "\tNot Supported!\n\n";
+            return;
+        }
         $displayPlayersObject->display();
     }
 }
 
-$playersObjectController = new PlayersObjectController();
+$playersObjectController = new PlayersObjectController('cli');
+
+$playersObjectController->getFileData('playerdata.json');
+
+$playersObjectController->getArrayData();
+
 $playersObjectController->getJsonData();
 
 ?>
